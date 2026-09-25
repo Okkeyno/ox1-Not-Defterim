@@ -3,49 +3,56 @@ import sqlite3
 import customtkinter as ctk
 
 # --- VERİTABANI YOLU AYARI (AppData/Local/Rehbercim) ---
-app_data_dir = os.path.join(os.getenv("LOCALAPPDATA", os.path.expanduser("~")), "Rehbercim")
+app_data_dir = os.path.join(os.getenv("LOCALAPPDATA", os.path.expanduser("~")), "ox1 Not Defterim")
 os.makedirs(app_data_dir, exist_ok=True)  # Klasör yoksa otomatik oluştur kodu
 
-db_path = os.path.join(app_data_dir, "contacts.db")
+db_path = os.path.join(app_data_dir, "duties.db")
 
+#
 # VERİTABANI KURULUMU VE BAĞLANMA
+#
 connection = sqlite3.connect(db_path)
 cursor = connection.cursor()
 
 cursor.execute(
     """
-CREATE TABLE IF NOT EXISTS contacts (
+CREATE TABLE IF NOT EXISTS duties (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
-    phone TEXT NOT NULL UNIQUE,
-    notum TEXT
+    number TEXT NOT NULL UNIQUE,
+    notum TEXT,
+    tag TEXT NOT NULL DEFAULT 'default',
+    status TEXT NOT NULL DEFAULT 'active'
 )
 """
 )
 connection.commit()
 
-# --- 2. GÖRSEL ARAYÜZ (UI) TASARIMI ---
+#
+# GÖRSEL ARAYÜZ (UI) TASARIMI
+#
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
 
-class PhoneBookApp(ctk.CTk):
+class Ox1App(ctk.CTk):
 
     def __init__(self):
         super().__init__()
 
-        self.title("Rehber")
+        self.title("ox1 Not Defterim")
         self.geometry("450x650")
         self.resizable(False, False)
 
         self.title_label = ctk.CTkLabel(
             self,
-            text="📱 Rehbercim",
+            text="📱 ox1 Not Defterim",
             font=ctk.CTkFont(size=24, weight="bold"),
         )
         self.title_label.pack(pady=(20, 10))
 
-        # GİRDİ ALANLARI
+        # VERİ GİRİŞ ALANLARI
+        #
         self.form_frame = ctk.CTkFrame(self)
         self.form_frame.pack(fill="x", padx=20, pady=10)
 
@@ -54,10 +61,10 @@ class PhoneBookApp(ctk.CTk):
         )
         self.name_entry.pack(fill="x", padx=10, pady=5)
 
-        self.phone_entry = ctk.CTkEntry(
-            self.form_frame, placeholder_text="Phone Number"
+        self.number_entry = ctk.CTkEntry(
+            self.form_frame, placeholder_text="number Number"
         )
-        self.phone_entry.pack(fill="x", padx=10, pady=5)
+        self.number_entry.pack(fill="x", padx=10, pady=5)
 
         self.notum_entry = ctk.CTkEntry(
             self.form_frame, placeholder_text="Note (optional)"
@@ -89,57 +96,57 @@ class PhoneBookApp(ctk.CTk):
         self.list_frame = ctk.CTkScrollableFrame(self, height=320)
         self.list_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
-        self.load_contacts()
+        self.load_duties()
 
     def add_contact(self):
         name = self.name_entry.get().strip()
-        phone = self.phone_entry.get().strip()
+        number = self.number_entry.get().strip()
         notum = self.notum_entry.get().strip()
 
-        if not name or not phone:
+        if not name or not number:
             self.show_status(" Please fill in all fields!", "red")
             return
 
         try:
             cursor.execute(
-                "INSERT INTO contacts (name, phone, notum) VALUES (?, ?, ?)",
-                (name, phone, notum),
+                "INSERT INTO duties (name, number, notum) VALUES (?, ?, ?)",
+                (name, number, notum),
             )
             connection.commit()
             self.show_status(f"✅ Added: {name}", "green")
 
             self.name_entry.delete(0, "end")
-            self.phone_entry.delete(0, "end")
+            self.number_entry.delete(0, "end")
             self.notum_entry.delete(0, "end")
-            self.load_contacts()
+            self.load_duties()
         except sqlite3.IntegrityError:
-            self.show_status("❌ Phone number already exists!", "red")
+            self.show_status("❌ number number already exists!", "red")
 
-    def load_contacts(self, rows=None):
+    def load_duties(self, rows=None):
         for widget in self.list_frame.winfo_children():
             widget.destroy()
 
         if rows is None:
-            cursor.execute("SELECT * FROM contacts ORDER BY name ASC")
+            cursor.execute("SELECT * FROM duties ORDER BY name ASC")
             rows = cursor.fetchall()
 
         if not rows:
             no_data_label = ctk.CTkLabel(
-                self.list_frame, text="No contacts found."
+                self.list_frame, text="No duties found."
             )
             no_data_label.pack(pady=20)
             return
 
         for row in rows:
-            contact_id, name, phone, notum = row[0], row[1], row[2], row[3]
+            contact_id, name, number, notum = row[0], row[1], row[2], row[3]
 
             card = ctk.CTkFrame(self.list_frame, fg_color="#2A2D2E")
             card.pack(fill="x", pady=4, padx=5)
 
             if notum:
-                info_text = f"👤 {name}\n📞 {phone}\n📝 {notum}"
+                info_text = f"👤 {name}\n📞 {number}\n📝 {notum}"
             else:
-                info_text = f"👤 {name}\n📞 {phone}"
+                info_text = f"👤 {name}\n📞 {number}"
 
             info_label = ctk.CTkLabel(
                 card, text=info_text, justify="left", anchor="w"
@@ -160,17 +167,17 @@ class PhoneBookApp(ctk.CTk):
     def search_contact(self, event=None):
         query = self.search_entry.get().strip()
         cursor.execute(
-            "SELECT * FROM contacts WHERE (name LIKE ?) OR (notum LIKE ?) ORDER BY name ASC",
+            "SELECT * FROM duties WHERE (name LIKE ?) OR (notum LIKE ?) ORDER BY name ASC",
             (f"%{query}%", f"%{query}%"),
         )
         results = cursor.fetchall()
-        self.load_contacts(results)
+        self.load_duties(results)
 
     def delete_contact(self, contact_id):
-        cursor.execute("DELETE FROM contacts WHERE id = ?", (contact_id,))
+        cursor.execute("DELETE FROM duties WHERE id = ?", (contact_id,))
         connection.commit()
         self.show_status("🗑️ Contact deleted", "orange")
-        self.load_contacts()
+        self.load_duties()
 
     def show_status(self, message, color):
         color_map = {
@@ -184,6 +191,6 @@ class PhoneBookApp(ctk.CTk):
 
 
 if __name__ == "__main__":
-    app = PhoneBookApp()
+    app = Ox1App()
     app.mainloop()
     connection.close()
