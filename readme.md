@@ -13,9 +13,10 @@ A task creation and note-taking desktop application built for personal use. You 
 * **UI Framework:** CustomTkinter
 * **Database:** SQLite3
 * **Packaging & Setup:** PyInstaller & Inno Setup
+  
+<img width="557" height="842" alt="dm2" src="https://github.com/user-attachments/assets/357002cc-ba4a-49da-ac32-2ef5193bba97" />
 
 ## Installation
-* Standart Win Steps
 
 ### For End Users:
 Simply download and run `ox1_Not_Defterim_Setup.exe` from the [Releases](../../releases) section and follow the setup wizard (Next -> Next -> Finish).
@@ -27,4 +28,4 @@ cd ox1-Not-Defterim
 pip install customtkinter
 python main.py
 
-<img width="557" height="842" alt="dm2" src="https://github.com/user-attachments/assets/357002cc-ba4a-49da-ac32-2ef5193bba97" />
+
