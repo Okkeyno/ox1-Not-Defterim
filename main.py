@@ -2,7 +2,8 @@ import os
 import sqlite3
 import customtkinter as ctk
 
-# --- VERİTABANI YOLU AYARI (AppData/Local/Rehbercim) ---
+# VERİTABANI YOLU AYARI (AppData/Local/Rehbercim)
+#
 app_data_dir = os.path.join(os.getenv("LOCALAPPDATA", os.path.expanduser("~")), "ox1 Not Defterim")
 os.makedirs(app_data_dir, exist_ok=True)  # Klasör yoksa otomatik oluştur kodu
 
@@ -41,12 +42,12 @@ class Ox1App(ctk.CTk):
         super().__init__()
 
         self.title("ox1 Not Defterim")
-        self.geometry("450x650")
+        self.geometry("450x650") #ekran boyutu
         self.resizable(False, False)
 
         self.title_label = ctk.CTkLabel(
             self,
-            text="📱 ox1 Not Defterim",
+            text="ox1 Not Defterim",
             font=ctk.CTkFont(size=24, weight="bold"),
         )
         self.title_label.pack(pady=(20, 10))
@@ -57,70 +58,84 @@ class Ox1App(ctk.CTk):
         self.form_frame.pack(fill="x", padx=20, pady=10)
 
         self.name_entry = ctk.CTkEntry(
-            self.form_frame, placeholder_text="Full Name"
+            self.form_frame, placeholder_text="Task Name"
         )
         self.name_entry.pack(fill="x", padx=10, pady=5)
 
+        self.form_frame = ctk.CTkFrame(self)
+        self.form_frame.pack(fill="x", padx=20, pady=2)
+
+        # Satırda 2 kutucuk olacak şekilde çerçeve  
         self.number_entry = ctk.CTkEntry(
-            self.form_frame, placeholder_text="number Number"
+            self.form_frame, placeholder_text="Number"
         )
-        self.number_entry.pack(fill="x", padx=10, pady=5)
+        self.number_entry.pack(side="left",fill="x", padx=10, pady=5)
+
+        self.tag_entry = ctk.CTkEntry(
+            self.form_frame, placeholder_text="Tag (#acil)"
+        )
+        self.tag_entry.pack(side="right",fill="x", padx=10, pady=5)
+
+        self.form_frame = ctk.CTkFrame(self)
+        self.form_frame.pack(fill="x", padx=20, pady=10)
 
         self.notum_entry = ctk.CTkEntry(
-            self.form_frame, placeholder_text="Note (optional)"
+            self.form_frame, placeholder_text="Not (optional)"
         )
         self.notum_entry.pack(fill="x", padx=10, pady=5)
 
         self.add_btn = ctk.CTkButton(
             self.form_frame,
-            text="Add Contact",
+            text="Add Task",
             fg_color="#3B82F6",
             hover_color="#2563EB",
-            command=self.add_contact,
+            command=self.add_task,
         )
         self.add_btn.pack(fill="x", padx=10, pady=(5, 10))
 
         # ARAMA ALANI
         self.search_entry = ctk.CTkEntry(
-            self, placeholder_text="🔍 Search contact..."
+            self, placeholder_text="Search task..."
         )
         self.search_entry.pack(fill="x", padx=20, pady=5)
-        self.search_entry.bind("<KeyRelease>", self.search_contact)
+        self.search_entry.bind("<KeyRelease>", self.search_task)
 
         self.status_label = ctk.CTkLabel(
             self, text="", font=ctk.CTkFont(size=12)
         )
         self.status_label.pack(pady=2)
 
-        # REHBER LİSTESİ
+        # GÖREV LİSTESİ
         self.list_frame = ctk.CTkScrollableFrame(self, height=320)
         self.list_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
         self.load_duties()
 
-    def add_contact(self):
+    def add_task(self):
         name = self.name_entry.get().strip()
         number = self.number_entry.get().strip()
+        tag = self.tag_entry.get().strip()
         notum = self.notum_entry.get().strip()
 
         if not name or not number:
-            self.show_status(" Please fill in all fields!", "red")
+            self.show_status(" Please fill in name and number!", "red")
             return
 
         try:
             cursor.execute(
-                "INSERT INTO duties (name, number, notum) VALUES (?, ?, ?)",
-                (name, number, notum),
+                "INSERT INTO duties (name, number, tag, notum) VALUES (?, ?, ?, ?)",
+                (name, number, tag, notum),
             )
             connection.commit()
-            self.show_status(f"✅ Added: {name}", "green")
+            self.show_status(f"Added: {name}", "green")
 
             self.name_entry.delete(0, "end")
             self.number_entry.delete(0, "end")
+            self.tag_entry.delete(0, "end")
             self.notum_entry.delete(0, "end")
             self.load_duties()
         except sqlite3.IntegrityError:
-            self.show_status("❌ number number already exists!", "red")
+            self.show_status("number already exists!", "red")
 
     def load_duties(self, rows=None):
         for widget in self.list_frame.winfo_children():
@@ -138,15 +153,15 @@ class Ox1App(ctk.CTk):
             return
 
         for row in rows:
-            contact_id, name, number, notum = row[0], row[1], row[2], row[3]
+            contact_id, name, number, notum, tag = row[0], row[1], row[2], row[3], row[4]
 
             card = ctk.CTkFrame(self.list_frame, fg_color="#2A2D2E")
             card.pack(fill="x", pady=4, padx=5)
 
             if notum:
-                info_text = f"👤 {name}\n📞 {number}\n📝 {notum}"
+                info_text = f" {name}\n {number}\n {tag} \n {notum}"
             else:
-                info_text = f"👤 {name}\n📞 {number}"
+                info_text = f" {name}\n {number}\n {tag}"
 
             info_label = ctk.CTkLabel(
                 card, text=info_text, justify="left", anchor="w"
@@ -164,11 +179,11 @@ class Ox1App(ctk.CTk):
             )
             delete_btn.pack(side="right", padx=10)
 
-    def search_contact(self, event=None):
+    def search_task(self, event=None):
         query = self.search_entry.get().strip()
         cursor.execute(
-            "SELECT * FROM duties WHERE (name LIKE ?) OR (notum LIKE ?) ORDER BY name ASC",
-            (f"%{query}%", f"%{query}%"),
+            "SELECT * FROM duties WHERE (name LIKE ?) OR (tag LIKE ?) OR (notum LIKE ?) ORDER BY name ASC",
+            (f"%{query}%", f"%{query}%", f"%{query}%"),
         )
         results = cursor.fetchall()
         self.load_duties(results)
