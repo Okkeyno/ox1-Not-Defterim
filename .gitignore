@@ -1,0 +1,17 @@
+# Python / PyInstaller Geçici Dosyaları
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+
+# Veritabanı ve Yerel Veriler (Güvenlik için)
+*.db
+*.sqlite3
+
+# Inno Setup Çıktıları
+Output/
+
+# IDE / Editör Ayarları
+.vscode/
+.idea/
