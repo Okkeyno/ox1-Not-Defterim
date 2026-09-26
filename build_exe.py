@@ -3,7 +3,7 @@ import subprocess
 import sys
 import customtkinter
 
-ctk_path = os.path.dirname(customtkinter.__file__)
+ctk_path = os.path.dirname(customtkinter.__file__) #customtkinter kütüphanesinin yolu
 
 command = [
     sys.executable,
@@ -12,6 +12,7 @@ command = [
     "--noconfirm",
     "--onefile",
     "--windowed",
+    "--icon=icon.ico", #ikon dosyası ekleme
     "--add-data",
     f"{ctk_path}{os.path.pathsep}customtkinter/",
     "--name",
@@ -22,3 +23,4 @@ command = [
 print(".exe paketleme başlatılıyor...")
 subprocess.run(command)
 print("'dist' klasörüne ox1_not_defterim.exe oluşturuldu!")
+

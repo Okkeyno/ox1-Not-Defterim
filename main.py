@@ -45,6 +45,12 @@ class Ox1App(ctk.CTk):
         self.geometry("450x650") #ekran boyutu
         self.resizable(False, False)
 
+        #ikon ayarı
+        try:
+            self.iconbitmap("icon.ico")
+        except Exception as e:
+            print(f"İkon yüklenemedi: {e}")
+
         self.title_label = ctk.CTkLabel(
             self,
             text="ox1 Not Defterim",
