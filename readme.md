@@ -1,4 +1,4 @@
-# ox1 v1.0.0
+# ox1 
 
 A task creation and note-taking desktop application built for personal use. You can download and install the app on your computer using the `.exe` setup file.
 
