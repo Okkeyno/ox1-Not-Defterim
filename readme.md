@@ -1,7 +1,9 @@
-# ox1 Task Manager & Notes v1.0.0
+# ox1 v1.0.0
 
 A task creation and note-taking desktop application built for personal use. You can download and install the app on your computer using the `.exe` setup file.
 
+> **Note for Windows Users:** Since this is an independent open-source project without a paid digital signature, Windows SmartScreen may show a warning. Click **"More info"** and then **"Run anyway"** to safely complete the installation.
+> 
 ## Features
 * **Task & Note Management:** Easily add, view, and delete daily tasks along with custom notes and tags.
 * **Search & Filtering:** Fast search functionality by task name, note content, or tags (`#tag`).
