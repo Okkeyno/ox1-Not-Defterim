@@ -14,6 +14,8 @@ command = [
     "--windowed",
     "--icon=icon.ico", #ikon dosyası ekleme
     "--add-data",
+    f"icon.ico{os.path.pathsep}.",  # icon.ico dosyasını exe içine gömer
+    "--add-data",
     f"{ctk_path}{os.path.pathsep}customtkinter/",
     "--name",
     "ox1 Not Defterim",

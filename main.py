@@ -1,8 +1,9 @@
 import os
 import sqlite3
 import customtkinter as ctk
+import sys
 
-# VERİTABANI YOLU AYARI (AppData/Local/Rehbercim)
+# VERİTABANI YOLU AYARI
 #
 app_data_dir = os.path.join(os.getenv("LOCALAPPDATA", os.path.expanduser("~")), "ox1 Not Defterim")
 os.makedirs(app_data_dir, exist_ok=True)  # Klasör yoksa otomatik oluştur kodu
@@ -35,6 +36,11 @@ connection.commit()
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+# PyInstaller paketlenmiş dosya yolunu bulan fonksiyon
+def get_resource_path(relative_path):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 class Ox1App(ctk.CTk):
 
@@ -45,11 +51,12 @@ class Ox1App(ctk.CTk):
         self.geometry("450x650") #ekran boyutu
         self.resizable(False, False)
 
-        #ikon ayarı
+        # İkonu ekleme
         try:
-            self.iconbitmap("icon.ico")
+            icon_path = get_resource_path("icon.ico")
+            self.iconbitmap(icon_path)
         except Exception as e:
-            print(f"İkon yüklenemedi: {e}")
+            print(f"İkon yükleme hatası: {e}")
 
         self.title_label = ctk.CTkLabel(
             self,
